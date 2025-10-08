@@ -30,7 +30,7 @@ cd(fileparts(mfilename('fullpath')));
 
 % Command window text
 disp([' ', newline, repmat('*', 1, 66), newline, ' '])
-disp(['Welcome to the baseline robust aircraft testing (brat) environment.', newline)
+disp(['Welcome to the baseline robust aircraft testing (brat) environment.', newline])
 disp([repmat('-', 1, 66), newline])
 disp(['First, select the desired vehicle.', newline, ' '])
 
@@ -68,9 +68,9 @@ currentDir = pwd(); % Get the current folder
 addpath(genpath(currentDir)); % Add the current folder and subfolders to path
 
 % Check user inputs for errors
-if vehicle.type ~= 1 || vehicle.type ~= 2
+if vehicle.type ~= 1 && vehicle.type ~= 2
     error('Invalid vehicle selection.')
-elseif Setup.type ~= 1 || Setup.type ~= 2
+elseif Setup.type ~= 1 && Setup.type ~= 2
     error('Invalid setup case.')
 end
 
@@ -89,9 +89,11 @@ end
 % Execute based on setup type
 switch Setup.type
     case {1, 2}  
-        config_FCS 
+        % Set global sample time for the Simulink logic 
+        FCS.samp_time = 1/200;
+
         % Open selected system
-        open([Setup.FCS_Flight, '.slx']);
+        open('FCS_Hardware.slx');
 
         % Configure logging and GCS settings
         subsystem = '/FCS Out/Write ULOG Data';
@@ -101,7 +103,7 @@ switch Setup.type
             set_param([Setup.FCS_Flight, subsystem], 'ReferencedSubsystem', 'Write_ULOG_Disabled');
         end
 
-        disp("The Simulink model for hardware deployment has loaded successfully.");
+        disp("The Simulink model for algorithm deployment on hardware has loaded successfully.");
 
     otherwise
         error('Invalid setup type selected.');
