@@ -1,9 +1,10 @@
-%% NSL Vehicle Hardware Setup Script
+%% Baseline Robust Aircraft Testing (brat) Hardware Setup Script
 % DESCRIPTION: 
 %   This script initializes and loads the hardware deployment environment 
-%   for supported NSL vehicles. The script allows users to select the desired 
-%   vehicle and setup case, adding the necessary paths, and then loads the 
-%   appropriate Simulink model for simulation or hardware deployment.
+%   for a generic vehicle with a PX4 autopilot. The script allows users to 
+%   set up the Simulink environment that includes pre-built PX4 I/O, 
+%   facilitating a clear starting point for custom algorithm hardware-in-
+%   the-loop (hitl) bench testing and flight testing. 
 %
 % INPUTS: 
 %   User inputs are required for selecting the vehicle and setup case.
@@ -29,13 +30,12 @@ cd(fileparts(mfilename('fullpath')));
 
 % Command window text
 disp([' ', newline, repmat('*', 1, 66), newline, ' '])
-disp(['Welcome to the hardware deployment environment', newline, ...
-    'developed by the Nonlinear Systems Lab.', newline])
+disp(['Welcome to the baseline robust aircraft testing (brat) environment.', newline)
 disp([repmat('-', 1, 66), newline])
 disp(['First, select the desired vehicle.', newline, ' '])
 
 % Define available vehicles
-vehicle.cases = {'RACER', 'Dragon', 'CZ150_6','eSPAARO_5'};
+vehicle.cases = {'Generic Quadcopter', 'Generic Fixed-Wing'};
 
 % Display vehicle options and prompt user for selection
 fprintf('Available Vehicles: \n');
@@ -49,8 +49,8 @@ disp([newline, repmat('-', 1, 66), newline])
 disp(['Next, select the desired setup case.', newline, ' '])
 
 Setup.cases = {
-    'Custom FCS with Logging'
-    'Custom FCS without Logging'
+    'Connected IO (PX4 Logging Disabled)'
+    'Build, Deploy, & Start (PX4 Logging Enabled)'
 };
 
 % Display setup cases and prompt user for selection
@@ -63,61 +63,33 @@ disp(' ')
 
 disp([newline, repmat('-', 1, 66), newline])
 
-% Select if enabling custom control allocation
-disp(['Finally, enable or disable custom control allocation.', newline, ' '])
-
-disp(['Available Control Allocation Selections:', ...
-    newline, '   0. Disable Custom Control Allocation (Default to Stock PX4 Mixing)', ...
-    newline, '   1. Enable Custom Control Allocation'])
-enable_alloc = input('Select Answer: ');
-disp([newline, repmat('-', 1, 66), newline])
-
-if enable_alloc ~= 0 && enable_alloc ~= 1
-    error('Invalid control allocation selection. Either select Enabled/Disabled')
-end
-
 % Add current folder and subfolders to path
 currentDir = pwd(); % Get the current folder
 addpath(genpath(currentDir)); % Add the current folder and subfolders to path
 
+% Check user inputs for errors
+if vehicle.type ~= 1 || vehicle.type ~= 2
+    error('Invalid vehicle selection.')
+elseif Setup.type ~= 1 || Setup.type ~= 2
+    error('Invalid setup case.')
+end
+
 % Load vehicle-specific configurations
 switch vehicle.type
-    case 1  % RACER
-        RACER
-        Setup.vehicleName = 'RACER';
-        % Diagram names
-        Setup.FCS_Flight = 'FCS_flight';
-        FW_type = 0;
-    case 2  % Dragon
-        error('The dragon is not yet supported.')
-        Dragon
-        Setup.vehicleName = 'Dragon';
-        FW_type = 0;
-    case 3
-        CZ1506
-        Setup.vehicleName = 'CZ1506';
-        % Diagram names
-        Setup.FCS_Flight = 'FCS_flight_Fixed_Wing';
-        FW_type = 1; % for CZ150 6
-    
-    case 4
-        eSPAARO5
-        Setpu.vehicleName = 'eSPAARO5';
-
-        % Diagram names
-        Setup.FCS_Flight = 'FCS_flight_Fixed_Wing';
-        FW_type = 2; % for eSPAARO 5
-
+    case 1  % Generic Quadcopter
+        Generic_Quadcopter
+        Setup.vehicleName = 'Generic Quadcopter';
+    case 2  % Generic Fixed-Wing
+        Generic_Fixedwing
+        Setup.vehicleName = 'Generic Fixedwing';
     otherwise
         error('Invalid vehicle selection.');
 end
 
 % Execute based on setup type
 switch Setup.type
-
     case {1, 2}  
         config_FCS 
-
         % Open selected system
         open([Setup.FCS_Flight, '.slx']);
 
