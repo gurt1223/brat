@@ -4,10 +4,12 @@
 %   for a generic vehicle with a PX4 autopilot. The script allows users to 
 %   set up the Simulink environment that includes pre-built PX4 I/O, 
 %   facilitating a clear starting point for custom algorithm hardware-in-
-%   the-loop (hitl) bench testing and flight testing. 
+%   the-loop (hitl) bench testing and flight testing. The main Simulink 
+%   diagram in this brat repository will be referred to as the Flight 
+%   Control System (FCS) throughout the repository.
 %
 % INPUTS: 
-%   User inputs are required for selecting the vehicle and setup case.
+%   User inputs are required for selecting the setup case.
 %
 % OUTPUTS:
 %   The script loads the corresponding Simulink model and configures it based 
@@ -32,21 +34,9 @@ cd(fileparts(mfilename('fullpath')));
 disp([' ', newline, repmat('*', 1, 66), newline, ' '])
 disp(['Welcome to the baseline robust aircraft testing (brat) environment.', newline])
 disp([repmat('-', 1, 66), newline])
-disp(['First, select the desired vehicle.', newline, ' '])
-
-% Define available vehicles
-vehicle.cases = {'Generic Quadcopter', 'Generic Fixed-Wing'};
-
-% Display vehicle options and prompt user for selection
-fprintf('Available Vehicles: \n');
-for ii = 1:length(vehicle.cases)
-    fprintf('   %i. %s\n', ii, vehicle.cases{ii});
-end
-vehicle.type = input('Select Vehicle: ');
-disp([newline, repmat('-', 1, 66), newline])
 
 % Setup cases
-disp(['Next, select the desired setup case.', newline, ' '])
+disp(['Select the desired setup case.', newline, ' '])
 
 Setup.cases = {
     'Connected IO (PX4 Logging Disabled)'
@@ -68,39 +58,28 @@ currentDir = pwd(); % Get the current folder
 addpath(genpath(currentDir)); % Add the current folder and subfolders to path
 
 % Check user inputs for errors
-if vehicle.type ~= 1 && vehicle.type ~= 2
-    error('Invalid vehicle selection.')
-elseif Setup.type ~= 1 && Setup.type ~= 2
+if Setup.type ~= 1 && Setup.type ~= 2
     error('Invalid setup case.')
-end
-
-% Load vehicle-specific configurations
-switch vehicle.type
-    case 1  % Generic Quadcopter
-        Generic_Quadcopter
-        Setup.vehicleName = 'Generic Quadcopter';
-    case 2  % Generic Fixed-Wing
-        Generic_Fixedwing
-        Setup.vehicleName = 'Generic Fixedwing';
-    otherwise
-        error('Invalid vehicle selection.');
 end
 
 % Execute based on setup type
 switch Setup.type
     case {1, 2}  
+        % Name of the main FCS diagram
+        Setup.FCS_Hardware = 'FCS_Hardware';
+
         % Set global sample time for the Simulink logic 
-        FCS.samp_time = 1/200;
+        FCS_var.samp_time = 1/200;
 
         % Open selected system
-        open('FCS_Hardware.slx');
+        open([Setup.FCS_Hardware,'.slx']);
 
         % Configure logging and GCS settings
         subsystem = '/FCS Out/Write ULOG Data';
-        if Setup.type == 1
-            set_param([Setup.FCS_Flight, subsystem], 'ReferencedSubsystem', 'Write_ULOG_Data');
+        if Setup.type == 2
+            set_param([Setup.FCS_Hardware, subsystem], 'ReferencedSubsystem', 'Write_ULOG_Data');
         else
-            set_param([Setup.FCS_Flight, subsystem], 'ReferencedSubsystem', 'Write_ULOG_Disabled');
+            set_param([Setup.FCS_Hardware, subsystem], 'ReferencedSubsystem', 'Write_ULOG_Disabled');
         end
 
         disp("The Simulink model for algorithm deployment on hardware has loaded successfully.");
