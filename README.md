@@ -19,12 +19,18 @@ The **Baseline Robust Aircraft Testing (BRAT)** framework is a lightweight, Simu
 ## Quick Start
 
 1. **Requirements**
-   - MATLAB **R2025a**
-   - **UAV Toolbox**
-   - **UAV Toolbox Support Package for PX4 Autopilots** configured following the instructions in the **[UAV Toolbox Setup Guide](https://github.com/gurt1223/UAV-Toolbox-Setup-Guide)**
-   - A PX4-based flight controller (e.g., Pixhawk family) and QGroundControl for firmware/QGC setup
+- QGroundControl (v4.4.2)
+- MATLAB - R2025a
+- Simulink
+- MATLAB/Simulink Add-Ons
+  - UAV Toolbox
+  - UAV Toolbox Support Package for PX4 Autopilots
+  - MATLAB Coder
+  - Simulink Coder
+  - Embedded Coder 
+- A PX4-based flight controller (e.g., Pixhawk family) and QGroundControl for firmware/QGC setup
 
-2. **Clone or Download The Latest Release**
+3. **Clone or Download The Latest Release**
 
 ## Disclaimer
 
